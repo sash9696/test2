@@ -1,0 +1,9 @@
+Here's the pattern logic behind each mapping:
+The core stack for every feature is the same three patterns — RAG (top-k search with pgvector), streaming responses (so the UI feels fast), and multi-turn history in messages. Every AI feature builds on these three.
+What makes each feature different:
+Concept tutor and practice coach need temperature=0 — you want grounded, rubric-anchored answers, not creative ones. The coach should use multi-turn history + diagram-state injection each turn (not a tool loop), so each response is tied to the latest canvas state.
+Mock interviewer is the most complex — it combines the agent persona pattern (act as a staff engineer), max_turns cap so it doesn't run forever, conversation memory persisted to the DB, and trace() for debugging when interviews go wrong.
+Diagram reviewer and post-interview report both use LLM-as-judge with Pydantic output_type — you need a structured score object back, not free text.
+Layer B summariser at ingestion time uses the synthetic data generation pattern — you're using the LLM to manufacture clean summaries from raw scraped text. Run this once, never at runtime.
+What to skip entirely at v1 — fine-tuning, LoRA, multi-provider routing, quantised models. All overkill. RAG on your curriculum is the moat, not model customisation.
+The amber box at the bottom is the most important thing — run the model benchmarking pattern (week 4) before writing a single line of UI code. Prompt Claude with your Layer A MD and ask the same questions a real user would ask. If the answers aren't clearly better than vanilla ChatGPT, fix the curriculum first.
